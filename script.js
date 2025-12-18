@@ -42,86 +42,89 @@ function typeText() {
 window.addEventListener('load', () => {
     setTimeout(typeText, 1000);
 });
-        
-        // Fix dark mode for mobile devices
-document.addEventListener('DOMContentLoaded', function() {
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = themeToggle.querySelector('i');
-    
-    // Check for saved theme or system preference
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    const currentTheme = localStorage.getItem('theme');
-    
-    // Set initial theme - important for mobile
-    if (currentTheme === 'dark') {
+
+// Smart dark mode: auto-detect + manual control
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('i');
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const userPreference = localStorage.getItem('theme-preference');
+
+function applyTheme() {
+    if (userPreference === 'dark' || (userPreference === null && prefersDarkScheme.matches)) {
         document.body.classList.add('dark-mode');
         themeIcon.classList.remove('fa-moon');
         themeIcon.classList.add('fa-sun');
-    } else if (currentTheme === 'light') {
+    } else {
         document.body.classList.remove('dark-mode');
         themeIcon.classList.remove('fa-sun');
         themeIcon.classList.add('fa-moon');
-    } else if (prefersDarkScheme.matches) {
-        // System preference only if no saved preference
+    }
+}
+
+applyTheme();
+
+themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    
+    if (isDark) {
+        document.body.classList.remove('dark-mode');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+        localStorage.setItem('theme-preference', 'light');
+    } else {
         document.body.classList.add('dark-mode');
         themeIcon.classList.remove('fa-moon');
         themeIcon.classList.add('fa-sun');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('theme-preference', 'dark');
     }
-    
-    // Toggle theme function - mobile optimized
-    function toggleDarkMode() {
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        
-        if (isDarkMode) {
-            document.body.classList.remove('dark-mode');
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-            localStorage.setItem('theme', 'light');
-        } else {
+});
+
+prefersDarkScheme.addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme-preference')) {
+        if (e.matches) {
             document.body.classList.add('dark-mode');
             themeIcon.classList.remove('fa-moon');
             themeIcon.classList.add('fa-sun');
-            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
         }
     }
-    
-    // Add event listener - use touch events for mobile
-    themeToggle.addEventListener('click', toggleDarkMode);
-    themeToggle.addEventListener('touchstart', function(e) {
-        e.preventDefault(); // Prevent double tap zoom
-        toggleDarkMode();
-    }, { passive: false });
-    
-    // Listen for system theme changes (mobile)
-    prefersDarkScheme.addEventListener('change', (e) => {
-        const currentSavedTheme = localStorage.getItem('theme');
-        if (!currentSavedTheme) { // Only apply system change if no user preference
-            if (e.matches) {
-                document.body.classList.add('dark-mode');
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-            } else {
-                document.body.classList.remove('dark-mode');
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-            }
+});
+
+// Mobile Menu Toggle
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const navLinks = document.querySelector('.nav-links');
+const mobileMenuIcon = mobileMenuBtn.querySelector('i');
+
+if(mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        navLinks.classList.toggle('active');
+        if (navLinks.classList.contains('active')) {
+            mobileMenuIcon.classList.remove('fa-bars');
+            mobileMenuIcon.classList.add('fa-times');
+        } else {
+            mobileMenuIcon.classList.remove('fa-times');
+            mobileMenuIcon.classList.add('fa-bars');
         }
     });
+}
+
+// Close mobile menu when clicking links
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        mobileMenuIcon.classList.remove('fa-times');
+        mobileMenuIcon.classList.add('fa-bars');
+    });
 });
-           
-        
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                mobileMenuIcon.classList.remove('fa-times');
-                mobileMenuIcon.classList.add('fa-bars');
-            });
-        });
-        
-        // Form submission
-        contactForm.addEventListener('submit', (e) => {
+
+// Form submission
+const contactForm = document.getElementById('contactForm');
+contactForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const name = contactForm.querySelector('input[type="text"]').value;
@@ -137,175 +140,73 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Please fill in all required fields (Name, Email, Message).');
     }
 });
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            if (window.scrollY > 100) {
-                header.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
-                if (document.body.classList.contains('dark-mode')) {
-                    header.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
-                }
-            } else {
-                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.05)';
-                if (document.body.classList.contains('dark-mode')) {
-                    header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
-                }
-            }
-        });
-        
-        // Skill level animation on scroll
-        const observerOptions = {
-            threshold: 0.5
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animated');
-                }
-            });
-        }, observerOptions);
-        
-        // Observe skill categories for animation
-        document.querySelectorAll('.skill-category').forEach(category => {
-            observer.observe(category);
-        });
-        // Fix mobile navigation scrolling
-document.querySelectorAll('a[href="#home"]').forEach(link => {
-    link.addEventListener('click', function(e) {
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
         e.preventDefault();
-        const homeSection = document.getElementById('home');
-        if (homeSection) {
-            if (window.innerWidth <= 768) { // Mobile check
-                // Close mobile menu if open
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            // Close mobile menu if open
+            if (window.innerWidth <= 768 && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 mobileMenuIcon.classList.remove('fa-times');
                 mobileMenuIcon.classList.add('fa-bars');
             }
+            
             window.scrollTo({
-                top: homeSection.offsetTop - 80,
+                top: targetElement.offsetTop - 80,
                 behavior: 'smooth'
             });
         }
     });
 });
-// Mobile fixes for dark mode and navigation
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // 1. FIX DARK MODE TOGGLE
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = themeToggle.querySelector('i');
-    
-    // Set initial theme
-    const currentTheme = localStorage.getItem('theme');
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeIcon.classList.remove('fa-moon');
-        themeIcon.classList.add('fa-sun');
+
+// Header scroll effect
+window.addEventListener('scroll', () => {
+    const header = document.querySelector('header');
+    if (window.scrollY > 100) {
+        header.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+        if (document.body.classList.contains('dark-mode')) {
+            header.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+        }
+    } else {
+        header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.05)';
+        if (document.body.classList.contains('dark-mode')) {
+            header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+        }
     }
-    
-    // Mobile-optimized toggle
-    themeToggle.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent event bubbling
-        
-        const isDark = document.body.classList.toggle('dark-mode');
-        
-        if (isDark) {
-            themeIcon.classList.remove('fa-moon');
-            themeIcon.classList.add('fa-sun');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-            localStorage.setItem('theme', 'light');
+});
+
+// Skill level animation on scroll
+const observerOptions = {
+    threshold: 0.5
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animated');
         }
     });
-    
-    // 2. FIX LOGO NAVIGATION ON MOBILE
-    const homeLinks = document.querySelectorAll('a[href="#home"]');
-    
-    homeLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Close mobile menu if open
-            const navLinks = document.querySelector('.nav-links');
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            
-            if (navLinks && navLinks.classList.contains('active')) {
-                navLinks.classList.remove('active');
-                if (mobileMenuBtn) {
-                    const icon = mobileMenuBtn.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                }
-            }
-            
-            // Scroll to home section
-            const homeSection = document.getElementById('home');
-            if (homeSection) {
-                window.scrollTo({
-                    top: homeSection.offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-    
-    // 3. FIX MOBILE MENU TOGGLE (if not working)
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    if (mobileMenuBtn) {
-        const navLinks = document.querySelector('.nav-links');
-        const menuIcon = mobileMenuBtn.querySelector('i');
-        
-        mobileMenuBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            
-            navLinks.classList.toggle('active');
-            if (navLinks.classList.contains('active')) {
-                menuIcon.classList.remove('fa-bars');
-                menuIcon.classList.add('fa-times');
-            } else {
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-            }
-        });
-        
-        // Close menu when clicking links
-        document.querySelectorAll('.nav-links a').forEach(navLink => {
-            navLink.addEventListener('click', function() {
-                navLinks.classList.remove('active');
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-            });
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                navLinks.classList.remove('active');
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
-            }
-        });
+}, observerOptions);
+
+// Observe skill categories for animation
+document.querySelectorAll('.skill-category').forEach(category => {
+    observer.observe(category);
+});
+
+// Close menu when clicking outside (mobile)
+document.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768 && navLinks && mobileMenuBtn) {
+        if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            navLinks.classList.remove('active');
+            mobileMenuIcon.classList.remove('fa-times');
+            mobileMenuIcon.classList.add('fa-bars');
+        }
     }
 });
