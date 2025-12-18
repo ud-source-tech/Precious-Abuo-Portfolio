@@ -208,3 +208,104 @@ document.querySelectorAll('a[href="#home"]').forEach(link => {
         }
     });
 });
+// Mobile fixes for dark mode and navigation
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. FIX DARK MODE TOGGLE
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    // Set initial theme
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    }
+    
+    // Mobile-optimized toggle
+    themeToggle.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent event bubbling
+        
+        const isDark = document.body.classList.toggle('dark-mode');
+        
+        if (isDark) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+    
+    // 2. FIX LOGO NAVIGATION ON MOBILE
+    const homeLinks = document.querySelectorAll('a[href="#home"]');
+    
+    homeLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Close mobile menu if open
+            const navLinks = document.querySelector('.nav-links');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (navLinks && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                if (mobileMenuBtn) {
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+            
+            // Scroll to home section
+            const homeSection = document.getElementById('home');
+            if (homeSection) {
+                window.scrollTo({
+                    top: homeSection.offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // 3. FIX MOBILE MENU TOGGLE (if not working)
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        const navLinks = document.querySelector('.nav-links');
+        const menuIcon = mobileMenuBtn.querySelector('i');
+        
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            navLinks.classList.toggle('active');
+            if (navLinks.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+        
+        // Close menu when clicking links
+        document.querySelectorAll('.nav-links a').forEach(navLink => {
+            navLink.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                navLinks.classList.remove('active');
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+    }
+});

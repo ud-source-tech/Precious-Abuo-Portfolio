@@ -716,3 +716,36 @@
                 height: 100%;
                 object-fit: cover;
 }
+@media screen and (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block !important;
+        z-index: 1001;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background-color: var(--bg-color);
+        flex-direction: column;
+        padding: 20px 0;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        display: none;
+        z-index: 1000;
+    }
+    
+    .nav-links.active {
+        display: flex !important;
+    }
+    
+    .nav-links li {
+        margin: 15px 0;
+        text-align: center;
+    }
+    
+    .theme-toggle {
+        z-index: 1001;
+        position: relative;
+    }
+}
